@@ -1,10 +1,10 @@
 /***************************************************************************/
 /*                                                                         */
-/*  sfnt.c                                                                 */
+/*  ttsbit.h                                                               */
 /*                                                                         */
-/*    Single object library component.                                     */
+/*    TrueType and OpenType embedded bitmap support (specification).       */
 /*                                                                         */
-/*  Copyright 1996-2018 by                                                 */
+/*  Copyright 1996-2015 by                                                 */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -16,26 +16,39 @@
 /***************************************************************************/
 
 
-#define FT_MAKE_OPTION_SINGLE_OBJECT
+#ifndef __TTCOLR_H__
+#define __TTCOLR_H__
+
+
 #include <ft2build.h>
+#include "ttload.h"
 
-#include "pngshim.c"
-#include "sfdriver.c"
-#include "sfntpic.c"
-#include "sfobjs.c"
-#include "ttbdf.c"
-#include "ttcmap.c"
 
-#ifdef TT_CONFIG_OPTION_COLOR_LAYERS
-/* TODO: Move conditional inside. */
-#include "ttcolr.c"
-#endif
+FT_BEGIN_HEADER
 
-#include "ttkern.c"
-#include "ttload.c"
-#include "ttmtx.c"
-#include "ttpost.c"
-#include "ttsbit.c"
+
+  FT_LOCAL( FT_Error )
+  tt_face_load_colr( TT_Face    face,
+                     FT_Stream  stream );
+
+  FT_LOCAL( void )
+  tt_face_free_colr( TT_Face  face );
+
+  FT_LOCAL( FT_Error )
+  tt_face_load_colr_layers( TT_Face face,
+                            FT_Int glyph_id,
+                            FT_Glyph_LayerRec** ret_layers,
+                            FT_UShort* ret_num_layers );
+
+  FT_LOCAL( FT_Error )
+  tt_face_colr_blend_layer( TT_Face face,
+                            FT_Int color_index,
+                            FT_GlyphSlot dstSlot,
+                            FT_GlyphSlot srcSlot );
+
+FT_END_HEADER
+
+#endif /* __TTCOLR_H__ */
 
 
 /* END */

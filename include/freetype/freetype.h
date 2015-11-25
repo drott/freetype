@@ -1711,6 +1711,16 @@ FT_BEGIN_HEADER
   /*                                                                       */
   typedef struct FT_Slot_InternalRec_*  FT_Slot_Internal;
 
+  /*************************************************************************/
+  /*                                                                       */
+  /* <Type>                                                                */
+  /*    FT_Colr_Internal                                                   */
+  /*                                                                       */
+  /* <Description>                                                         */
+  /*    An opaque handle to an `FT_Colr_InternalRec' structure, used to    */
+  /*    model color related private data of a given @FT_Face object.       */
+  /*                                                                       */
+  typedef struct FT_Colr_InternalRec_*  FT_Colr_Internal;
 
   /*************************************************************************/
   /*                                                                       */
@@ -1939,6 +1949,8 @@ FT_BEGIN_HEADER
     void*             other;
 
     FT_Slot_Internal  internal;
+
+    FT_Colr_Internal  color_layers;
 
   } FT_GlyphSlotRec;
 

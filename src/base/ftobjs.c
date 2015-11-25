@@ -538,6 +538,14 @@
     /* free bitmap buffer if needed */
     ft_glyphslot_free_bitmap( slot );
 
+    /* free glyph color layers if needed */
+    if ( slot->color_layers )
+    {
+        FT_Colr_InternalRec *color_layers = slot->color_layers;
+        FT_FREE( color_layers->layers );
+        FT_FREE( slot->color_layers );
+    }
+
     /* slot->internal might be NULL in out-of-memory situations */
     if ( slot->internal )
     {
@@ -4486,10 +4494,15 @@
                             FT_GlyphSlot    slot,
                             FT_Render_Mode  render_mode )
   {
-    FT_Error     error = FT_Err_Ok;
-    FT_Renderer  renderer;
+    FT_Error           error = FT_Err_Ok;
+    FT_Renderer        renderer;
+    TT_Face            ttface;
+    SFNT_Service       sfnt;
+    FT_Int             idx;
+    FT_Int             load_flags;
+    FT_Glyph_LayerRec *glyph_layers;
 
-
+    FT_Face face = slot->face;
     /* if it is already a bitmap, no need to do anything */
     switch ( slot->format )
     {
@@ -4497,6 +4510,39 @@
       break;
 
     default:
+      if ( slot->color_layers != NULL )
+      {
+        error = FT_New_GlyphSlot( face, NULL );
+        ttface = (TT_Face)face;
+        sfnt = (SFNT_Service)ttface->sfnt;
+        if ( !error )
+        {
+          glyph_layers = slot->color_layers->layers;
+          for ( idx = 0; idx < slot->color_layers->num_layers; idx++ )
+          {
+            load_flags = slot->color_layers->load_flags & ~FT_LOAD_COLOR;
+            load_flags |= FT_LOAD_RENDER;
+            error = FT_Load_Glyph( face, glyph_layers[idx].glyph_index,
+                                   load_flags );
+            if ( error )
+              break;
+
+            error = sfnt->colr_blend( ttface, glyph_layers[idx].color_index,
+                slot, face->glyph );
+            if ( error )
+              break;
+          }
+          if ( !error )
+            slot->format = FT_GLYPH_FORMAT_BITMAP;
+          FT_Done_GlyphSlot( face->glyph );
+        }
+        if ( !error )
+          return error;
+
+        /* Failed to do the colored layer. Draw outline instead. */
+        slot->format = FT_GLYPH_FORMAT_OUTLINE;
+      }
+
       {
         FT_ListNode  node = NULL;
 

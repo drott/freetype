@@ -427,6 +427,65 @@ FT_BEGIN_HEADER
                           FT_Short*   abearing,
                           FT_UShort*  aadvance );
 
+  /*************************************************************************/
+  /*                                                                       */
+  /* <FuncType>                                                            */
+  /*    TT_Load_Colr_Layer_Func                                            */
+  /*                                                                       */
+  /* <Description>                                                         */
+  /*    Load the color layer data given a glyph index.                     */
+  /*                                                                       */
+  /* <Input>                                                               */
+  /*    face       :: The target face object.                              */
+  /*    idx        :: The glyph index.                                     */
+  /*                                                                       */
+  /*                                                                       */
+  /* <Output>                                                              */
+  /*    layers     :: The layer info with color index and glyph index.     */
+  /*                  Free with FT_FREE()                                  */
+  /*    num_layers :: Number of layers                                     */
+  /*                                                                       */
+  /* <Return>                                                              */
+  /*    FreeType error code.  0 means success.  Returns an error if no     */
+  /*    color layer information exists for glyph index.                    */
+  /*                                                                       */
+  typedef FT_Error
+  (*TT_Load_Colr_Layer_Func)( TT_Face             face,
+                              FT_Int              idx,
+                              FT_Glyph_LayerRec** layers,
+                              FT_UShort*          ret_num_layers );
+
+
+  /*************************************************************************/
+  /*                                                                       */
+  /* <FuncType>                                                            */
+  /*    TT_Blend_Colr_Func                                                 */
+  /*                                                                       */
+  /* <Description>                                                         */
+  /*    Blend the bitmap in newGlyph with color index dstSlot using the    */
+  /*    color specified by color_index.                                    */
+  /*    XXX: Handle foregound color                                        */
+  /*                                                                       */
+  /* <Input>                                                               */
+  /*    face          :: The target face object.                           */
+  /*    color_index   :: color_index from the COLR table                   */
+  /*    base_glyph    :: Slot to for bitmap to be merged into. Underlying  */
+  /*                     bitmap maybe reallocated.                         */
+  /*    new_glyph     :: Slot to be incooperated into base_glyph.          */
+  /*                                                                       */
+  /* <Output>                                                              */
+  /*    none                                                               */
+  /*                                                                       */
+  /* <Return>                                                              */
+  /*    FreeType error code.  0 means success.  Returns an error if        */
+  /*    color_index is invalid or reallocation fails.                      */
+  /*                                                                       */
+  typedef FT_Error
+  (*TT_Blend_Colr_Func)( TT_Face      face,
+                         FT_Int       color_index,
+                         FT_GlyphSlot base_glyph,
+                         FT_GlyphSlot new_glyph );
+
 
   /*************************************************************************/
   /*                                                                       */
@@ -616,6 +675,11 @@ FT_BEGIN_HEADER
     TT_Set_SBit_Strike_Func      set_sbit_strike;
     TT_Load_Strike_Metrics_Func  load_strike_metrics;
 
+    TT_Load_Table_Func           load_colr;
+    TT_Free_Table_Func           free_colr;
+    TT_Load_Colr_Layer_Func      load_colr_layer;
+    TT_Blend_Colr_Func           colr_blend;
+
     TT_Get_Metrics_Func          get_metrics;
 
     TT_Get_Name_Func             get_name;
@@ -659,6 +723,10 @@ FT_BEGIN_HEADER
           free_eblc_,                    \
           set_sbit_strike_,              \
           load_strike_metrics_,          \
+          load_colr_,                    \
+          free_colr_,                    \
+          load_colr_layer_,              \
+          colr_blend_,                   \
           get_metrics_,                  \
           get_name_,                     \
           get_name_id_ )                 \
@@ -692,6 +760,10 @@ FT_BEGIN_HEADER
     free_eblc_,                          \
     set_sbit_strike_,                    \
     load_strike_metrics_,                \
+    load_colr_,                          \
+    free_colr_,                          \
+    load_colr_layer_,                    \
+    colr_blend_,                         \
     get_metrics_,                        \
     get_name_,                           \
     get_name_id_                         \
@@ -730,6 +802,10 @@ FT_BEGIN_HEADER
           load_hmtx_,                                   \
           load_eblc_,                                   \
           free_eblc_,                                   \
+          load_colr_,                                   \
+          free_colr_,                                   \
+          load_colr_layer_,                             \
+          colr_blend_,                                  \
           set_sbit_strike_,                             \
           load_strike_metrics_,                         \
           get_metrics_,                                 \
@@ -767,6 +843,10 @@ FT_BEGIN_HEADER
     clazz->load_hmtx           = load_hmtx_;            \
     clazz->load_eblc           = load_eblc_;            \
     clazz->free_eblc           = free_eblc_;            \
+    clazz->load_colr           = load_colr_;            \
+    clazz->free_colr           = free_colr_;            \
+    clazz->load_colr_layer     = load_colr_layer_;      \
+    clazz->colr_blend_         = colr_blend_;           \
     clazz->set_sbit_strike     = set_sbit_strike_;      \
     clazz->load_strike_metrics = load_strike_metrics_;  \
     clazz->get_metrics         = get_metrics_;          \

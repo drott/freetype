@@ -33,6 +33,10 @@
 #include "ttsbit.h"
 #endif
 
+#ifdef TT_CONFIG_OPTION_COLOR_LAYERS
+#include "ttcolr.h"
+#endif
+
 #ifdef TT_CONFIG_OPTION_POSTSCRIPT_NAMES
 #include "ttpost.h"
 #endif
@@ -1198,6 +1202,12 @@
 #define PUT_EMBEDDED_BITMAPS( a )  NULL
 #endif
 
+#ifdef TT_CONFIG_OPTION_COLOR_LAYERS
+#define PUT_COLOR_LAYERS( a )  a
+#else
+#define PUT_COLOR_LAYERS( a )  NULL
+#endif
+
 #ifdef TT_CONFIG_OPTION_POSTSCRIPT_NAMES
 #define PUT_PS_NAMES( a )  a
 #else
@@ -1260,6 +1270,10 @@
     PUT_EMBEDDED_BITMAPS( tt_face_load_strike_metrics ),
                     /* TT_Load_Strike_Metrics_Func load_strike_metrics */
 
+    PUT_COLOR_LAYERS( tt_face_load_colr ),
+    PUT_COLOR_LAYERS( tt_face_free_colr ),
+    PUT_COLOR_LAYERS( tt_face_load_colr_layers ),
+    PUT_COLOR_LAYERS( tt_face_colr_blend_layer ),
     tt_face_get_metrics,    /* TT_Get_Metrics_Func     get_metrics     */
 
     tt_face_get_name,       /* TT_Get_Name_Func        get_name        */
